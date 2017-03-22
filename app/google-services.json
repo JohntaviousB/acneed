@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "599688665199",
+    "firebase_url": "https://acneed-b54e7.firebaseio.com",
+    "project_id": "acneed-b54e7",
+    "storage_bucket": "acneed-b54e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599688665199:android:9dd3e0f8099b5e18",
+        "android_client_info": {
+          "package_name": "com.abusement.park.acneed"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "599688665199-g692b9517r1ap24n6foq2fekhpbt81f5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBomyuqyX9HsjDUXH74eEZf7p5pbtZXAiA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
