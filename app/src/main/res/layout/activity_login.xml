@@ -2,4 +2,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Acneed"
+        android:id="@+id/Welcome_username"
+        android:layout_marginStart="32dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="28dp"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Login_username_edit_text"
+        android:layout_below="@+id/Welcome_username"
+        android:layout_alignStart="@+id/Welcome_username"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="98dp"
+        android:hint="Username"
+        android:width="200dp"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/Login_password_edit_text"
+        android:layout_below="@+id/Login_username_edit_text"
+        android:layout_alignStart="@+id/Login_username_edit_text"
+        android:hint="Password"
+        android:width="200dp"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login"
+        android:id="@+id/Login_login_button"
+        android:layout_centerVertical="true"
+        android:layout_alignStart="@+id/Login_password_edit_text"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Up"
+        android:id="@+id/Login_register_button"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/Login_login_button"
+        android:layout_marginStart="10dp"/>
 </RelativeLayout>
