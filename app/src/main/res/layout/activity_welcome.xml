@@ -36,11 +36,21 @@
         android:layout_marginTop="48dp"/>
 
     <HorizontalScrollView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:id="@+id/Home_thumbnails_scroll_view"
         android:layout_below="@+id/Home_my_journey_text"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/Home_scroll_view_layout">
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <ImageButton
         android:layout_width="20dp"
