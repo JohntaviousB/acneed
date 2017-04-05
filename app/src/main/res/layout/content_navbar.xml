@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <ImageButton
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/home"
+        android:src="@drawable/home"
+        android:layout_weight=".5"
+        android:background="@android:color/transparent"
+        android:onClick="goHome"/>
+
+    <ImageButton
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/logout"
+        android:src="@drawable/logout"
+        android:layout_weight=".5"
+        android:background="@android:color/transparent"
+        android:onClick="logout"/>
+</LinearLayout>

@@ -48,8 +48,7 @@ public class WelcomeActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         if (firebaseAuth.getCurrentUser() == null) {
-            finish();
-            startActivity(new Intent(this, LoginActivity.class));
+            logout(null);
         }
         initializeViews();
         currentReminderFrequency = frequencyEditText.getText().toString();
@@ -128,6 +127,16 @@ public class WelcomeActivity extends AppCompatActivity {
             // todo need to update the database with new settings
             // probably use an AsyncTask
         }
+    }
+
+    public void logout(View view) {
+        finish();
+        firebaseAuth.signOut();
+        startActivity(new Intent(this, LoginActivity.class));
+    }
+
+    public void goHome(View view) {
+        //no need to do anything since we're already home
     }
 
 }

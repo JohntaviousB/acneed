@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                public void onComplete(Task<AuthResult> task) {
                    progressDialog.dismiss();
                    if (task.isSuccessful()) {
-                       Log.i(TAG, "Registration successful.Creating new user.");
+                       Log.i(TAG, "Registration successful. Creating new user.");
                        progressDialog.setMessage("Uploading credentials...");
                        progressDialog.show();
                        User newUser = new User(email, password, task.getResult().getUser().getUid());
