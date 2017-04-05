@@ -10,10 +10,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.abusement.park.acneed.R;
+import com.abusement.park.acneed.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,12 +29,14 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
 
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         firebaseAuth = FirebaseAuth.getInstance();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
         if (firebaseAuth.getCurrentUser() != null) {
             Log.i(TAG, "User is still logged in from previous session.");
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -67,8 +72,8 @@ public class LoginActivity extends AppCompatActivity {
     public void register(View registerButton) {
         Log.d(TAG, "Registration clicked");
         if (validateTextFields()) {
-            String email = userNameEditText.getText().toString().trim();
-            String password = userNameEditText.getText().toString().trim();
+            final String email = userNameEditText.getText().toString().trim();
+            final String password = userNameEditText.getText().toString().trim();
             progressDialog.setMessage("Registering...");
             progressDialog.show();
             firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new
@@ -77,7 +82,12 @@ public class LoginActivity extends AppCompatActivity {
                public void onComplete(Task<AuthResult> task) {
                    progressDialog.dismiss();
                    if (task.isSuccessful()) {
-                       Log.i(TAG, "Registration successful.");
+                       Log.i(TAG, "Registration successful.Creating new user.");
+                       progressDialog.setMessage("Uploading credentials...");
+                       progressDialog.show();
+                       User newUser = new User(email, password, task.getResult().getUser().getUid());
+                       databaseReference.child("users").child(task.getResult().getUser().getUid()).setValue(newUser);
+                       progressDialog.dismiss();
                        finish();
                        startActivity(new Intent(LoginActivity.this, WelcomeActivity.class));
                    } else {
@@ -88,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                    }
                }
            });
-}
+        }
     }
 
     private boolean validateTextFields() {

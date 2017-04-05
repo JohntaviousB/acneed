@@ -10,9 +10,8 @@ import java.io.FileNotFoundException;
 
 public class ImageCompressor {
 
-
     /**
-     * Needed in order to avoid OutOfMemoryExceptions
+     * Needed in order to avoid OutOfMemoryExceptions when instantiating multiple thumbnails
      * @param filepath
      * @param contentResolver
      * @param width
@@ -25,7 +24,7 @@ public class ImageCompressor {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inTempStorage = new byte[24 * 1024];
         options.inJustDecodeBounds = false;
-        options.inSampleSize=4;
+        options.inSampleSize = 4;
         Bitmap bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(filepath), null, options);
         return ThumbnailUtils.extractThumbnail(bitmap, width, height);
     }

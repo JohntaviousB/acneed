@@ -69,7 +69,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/Home_thumbnails_scroll_view"
         android:layout_alignStart="@+id/Home_my_journey_text"
-        android:layout_marginEnd="20dp">
+        android:layout_marginEnd="20dp"
+        android:id="@+id/linearLayout">
 
         <TextView
             android:layout_width="0dp"
@@ -91,12 +92,13 @@
             android:width="10dp"
             android:layout_weight="0.2"/>
 
-        <Spinner
+        <TextView
             android:layout_width="0dp"
+            android:text="days"
             android:layout_height="match_parent"
-            android:id="@+id/Home_interval_spinner"
+            android:id="@+id/Home_interval_text"
             android:spinnerMode="dropdown"
-            android:layout_weight=".55"/>
+            android:layout_weight=".20"/>
 
         <TextView
             android:layout_width="0dp"
