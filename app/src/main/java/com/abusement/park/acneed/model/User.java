@@ -1,6 +1,7 @@
 package com.abusement.park.acneed.model;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,14 +13,6 @@ public class User {
     private List<Image> images;
     private Settings settings;
 
-    public Settings getSettings() {
-        return settings;
-    }
-
-    public void setSettings(Settings settings) {
-        this.settings = settings;
-    }
-
     public User() {
     }
 
@@ -27,6 +20,22 @@ public class User {
         this.email = email;
         this.password = password;
         this.uid = uid;
+        images = new ArrayList<>();
+    }
+
+    public void addImage(Image image) {
+        if (images == null) {
+            images = new ArrayList<>();
+        }
+        images.add(image);
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
 //    public static User.Builder builder() {

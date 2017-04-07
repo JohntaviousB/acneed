@@ -3,6 +3,7 @@ package com.abusement.park.acneed.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -12,14 +13,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abusement.park.acneed.R;
+import com.abusement.park.acneed.model.Image;
+import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.utils.ImageCompressor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONStringer;
 
 import java.io.FileNotFoundException;
+import java.util.Date;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -93,6 +103,28 @@ public class WelcomeActivity extends AppCompatActivity {
             newThumbnail.setLayoutParams(new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
                     THUMBNAIL_HEIGHT));
             thumbnailsLayout.addView(newThumbnail);
+            final Image toAdd = new Image(data.getData().toString(), new Date());
+            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid())
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            try {
+                                Log.d(TAG, "Retrieved user: " + new ObjectMapper().writerWithDefaultPrettyPrinter()
+                                        .writeValueAsString(user));
+                            } catch (JsonProcessingException e) {
+                                Log.d(TAG, "Could not write the json for the user :(", e);
+                            }
+                            user.addImage(toAdd);
+                            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue
+                                    (user);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.d(TAG, "Failed to read data", databaseError.toException());
+                        }
+                    });
         }
     }
 
