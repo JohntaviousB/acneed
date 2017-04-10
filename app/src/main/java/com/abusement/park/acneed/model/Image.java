@@ -5,15 +5,24 @@ import java.util.Objects;
 
 public class Image {
 
-    private String uri;
     private Date uploadDate;
+    private String uri;
 
     public Image() {
     }
 
     public Image(String uri, Date uploadDate) {
+        this.uploadDate = new Date(uploadDate.getTime());
         this.uri = uri;
-        this.uploadDate = uploadDate;
+    }
+
+
+    public Date getUploadDate() {
+        return new Date(uploadDate.getTime());
+    }
+
+    public void setUploadDate(Date uploadDate) {
+        this.uploadDate = new Date(uploadDate.getTime());
     }
 
     public String getUri() {
@@ -22,14 +31,6 @@ public class Image {
 
     public void setUri(String uri) {
         this.uri = uri;
-    }
-
-    public Date getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(Date uploadDate) {
-        this.uploadDate = uploadDate;
     }
 
     @Override

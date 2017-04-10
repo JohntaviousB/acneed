@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class Settings {
 
-    private byte alertFrequency;
+    private int alertFrequency;
 
     public static final Settings DEFAULT_SETTINGS = new Settings();
 
@@ -15,15 +15,15 @@ public class Settings {
     public Settings() {
     }
 
-    public Settings(byte alertFrequency) {
+    public Settings(int alertFrequency) {
         this.alertFrequency = alertFrequency;
     }
 
-    public short getAlertFrequency() {
+    public int getAlertFrequency() {
         return alertFrequency;
     }
 
-    public void setAlertFrequency(byte alertFrequency) {
+    public void setAlertFrequency(int alertFrequency) {
         this.alertFrequency = alertFrequency;
     }
 

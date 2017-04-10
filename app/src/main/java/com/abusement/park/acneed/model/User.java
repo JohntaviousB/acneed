@@ -14,6 +14,8 @@ public class User {
     private Settings settings;
 
     public User() {
+        images = new ArrayList<>();
+        settings = Settings.DEFAULT_SETTINGS;
     }
 
     public User(String email, String password, String uid) {
@@ -21,6 +23,7 @@ public class User {
         this.password = password;
         this.uid = uid;
         images = new ArrayList<>();
+        settings = Settings.DEFAULT_SETTINGS;
     }
 
     public void addImage(Image image) {

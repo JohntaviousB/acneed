@@ -1,6 +1,8 @@
 package com.abusement.park.acneed.activity;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonWriter;
@@ -38,6 +40,8 @@ public class WelcomeActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
 
+    private User user;
+
     private EditText frequencyEditText;
     private TextView editReminderSettingsTextView;
     private TextView saveReminderSettingsTextView;
@@ -61,11 +65,41 @@ public class WelcomeActivity extends AppCompatActivity {
             logout(null);
         }
         initializeViews();
+        retrieveUser();
         currentReminderFrequency = frequencyEditText.getText().toString();
         String email = firebaseAuth.getCurrentUser().getEmail();
         String defaultUsername = email.substring(0, email.indexOf('@'));
         usernameText.setText(StringUtils.isBlank(firebaseAuth.getCurrentUser().getDisplayName())
                 ? defaultUsername : firebaseAuth.getCurrentUser().getDisplayName());
+    }
+
+    private void retrieveUser() {
+        databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+
+                    /* Beware this is called asynchronously */
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        user = dataSnapshot.getValue(User.class);
+                        if (user != null) {
+                            clearThumbnails();
+                            for (Image image : user.getImages()) {
+                                addThumbnailToScrollView(Uri.parse(image.getUri()));
+                            }
+                        }
+                        try {
+                            Log.d(TAG, "Retrieved user: " + new ObjectMapper().writerWithDefaultPrettyPrinter()
+                                    .writeValueAsString(user));
+                        } catch (JsonProcessingException e) {
+                            Log.d(TAG, "Could not write the json for the user :(", e);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "Failed to read data", databaseError.toException());
+                    }
+                });
     }
 
     private void initializeViews() {
@@ -76,56 +110,55 @@ public class WelcomeActivity extends AppCompatActivity {
         thumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
     }
 
+    private void clearThumbnails() {
+        thumbnailsLayout.removeAllViews();
+    }
+
     public void displayEditProfileDialog(View view) {
         // TODO: 3/25/2017
     }
 
     public void addImageToMyJourney(View view) {
-        Intent chooseImage = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(chooseImage, "Select Image to Add to " +
-                "Journey"), CHOOSE_IMAGE_REQUEST_CODE);
+        Intent chooseImage;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            chooseImage = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            chooseImage.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        } else {
+            chooseImage = new Intent(Intent.ACTION_GET_CONTENT);
+        }
+        chooseImage.setType("image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(Intent.createChooser(chooseImage, "Select Image to Add to Journey"),
+                CHOOSE_IMAGE_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
             Log.d(TAG, "Choose Image Request completed with data " + data.getData());
-            ImageView newThumbnail = new ImageView(this);
-            Log.d(TAG, "Attempting to compress Image");
-            try {
-                newThumbnail.setImageBitmap(ImageCompressor.compressImageToThumbnail(data.getData(),
-                        getContentResolver(), THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "Error compressing image", e);
-                Toast.makeText(this, "Failed to upload image.", Toast.LENGTH_LONG).show();
-            }
-            Log.d(TAG, "Image compression succeeded. Setting layout and adding to layout");
-            newThumbnail.setLayoutParams(new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
-                    THUMBNAIL_HEIGHT));
-            thumbnailsLayout.addView(newThumbnail);
-            final Image toAdd = new Image(data.getData().toString(), new Date());
-            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid())
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-                            try {
-                                Log.d(TAG, "Retrieved user: " + new ObjectMapper().writerWithDefaultPrettyPrinter()
-                                        .writeValueAsString(user));
-                            } catch (JsonProcessingException e) {
-                                Log.d(TAG, "Could not write the json for the user :(", e);
-                            }
-                            user.addImage(toAdd);
-                            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue
-                                    (user);
-                        }
+            int takeFlags = data.getFlags();
+            takeFlags &= Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            getContentResolver().takePersistableUriPermission(data.getData(), takeFlags);
+            user.addImage(new Image(data.getData().toString(), new Date()));
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Log.d(TAG, "Failed to read data", databaseError.toException());
-                        }
-                    });
+            //update the database to account for the new image
+            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
+            addThumbnailToScrollView(data.getData());
         }
+    }
+
+    private void addThumbnailToScrollView(Uri imageUri) {
+        ImageView newThumbnail = new ImageView(this);
+        Log.d(TAG, "Attempting to compress Image " + imageUri);
+        try {
+            newThumbnail.setImageBitmap(ImageCompressor.compressImageToThumbnail(imageUri, getContentResolver(),
+                    THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "Error compressing image", e);
+            Toast.makeText(this, "Failed to upload image.", Toast.LENGTH_LONG).show();
+        }
+        Log.d(TAG, "Image compression succeeded. Setting layout and adding to layout");
+        newThumbnail.setLayoutParams(new LinearLayout.LayoutParams(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
+        thumbnailsLayout.addView(newThumbnail);
     }
 
     public void editReminderSettings(View view) {
