@@ -1,14 +1,16 @@
 package com.abusement.park.acneed.activity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,10 +30,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONStringer;
 
 import java.io.FileNotFoundException;
 import java.util.Date;
+
+import static android.text.format.DateFormat.getMediumDateFormat;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -53,7 +56,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1;
     private static final int THUMBNAIL_HEIGHT = 100;
     private static final int THUMBNAIL_WIDTH = 100;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +85,9 @@ public class WelcomeActivity extends AppCompatActivity {
                         user = dataSnapshot.getValue(User.class);
                         if (user != null) {
                             clearThumbnails();
+                            int index = 0;
                             for (Image image : user.getImages()) {
-                                addThumbnailToScrollView(Uri.parse(image.getUri()));
+                                addThumbnailToScrollView(Uri.parse(image.getUri()), index++);
                             }
                         }
                         try {
@@ -142,11 +145,10 @@ public class WelcomeActivity extends AppCompatActivity {
 
             //update the database to account for the new image
             databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
-            addThumbnailToScrollView(data.getData());
         }
     }
 
-    private void addThumbnailToScrollView(Uri imageUri) {
+    private void addThumbnailToScrollView(Uri imageUri, final int index) {
         ImageView newThumbnail = new ImageView(this);
         Log.d(TAG, "Attempting to compress Image " + imageUri);
         try {
@@ -158,7 +160,59 @@ public class WelcomeActivity extends AppCompatActivity {
         }
         Log.d(TAG, "Image compression succeeded. Setting layout and adding to layout");
         newThumbnail.setLayoutParams(new LinearLayout.LayoutParams(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
+        newThumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayDialog(v, index);
+            }
+        });
         thumbnailsLayout.addView(newThumbnail);
+    }
+
+    private void displayDialog(View v, int index) {
+        final Dialog imageDialog = new Dialog(this);
+        imageDialog.setContentView(R.layout.full_image_dialog);
+        imageDialog.show();
+
+        final ImageView imgView = (ImageView) imageDialog.findViewById(R.id.Full_image_image_view);
+        imgView.setImageURI(Uri.parse(user.getImages().get(index).getUri()));
+        final ImageButton leftButton = (ImageButton) imageDialog.findViewById(R.id.Full_image_left_button);
+        final ImageButton rightButton = (ImageButton) imageDialog.findViewById(R.id.Full_image_right_button);
+        final TextView dateText = (TextView) imageDialog.findViewById(R.id.Full_image_date_text);
+        dateText.setText(getMediumDateFormat(getApplicationContext()).format(user.getImages().get(index).getUploadDate()));
+
+        enableButtonsBasedOnIndex(user.getImages().size(), index, leftButton, rightButton);
+        final IntegerWrapper wrappedIndex = new IntegerWrapper(index); // workaround the "effectively final" requirement
+
+        leftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imgView.setImageURI(Uri.parse(user.getImages().get(--wrappedIndex.value).getUri()));
+                dateText.setText(getMediumDateFormat(getApplicationContext()).format(user.getImages().get
+                        (wrappedIndex.value).getUploadDate()));
+                enableButtonsBasedOnIndex(user.getImages().size(), wrappedIndex.value, leftButton, rightButton);
+            }
+        });
+
+        rightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imgView.setImageURI(Uri.parse(user.getImages().get(++wrappedIndex.value).getUri()));
+                dateText.setText(getMediumDateFormat(getApplicationContext()).format(user.getImages().get
+                        (wrappedIndex.value).getUploadDate()));
+                enableButtonsBasedOnIndex(user.getImages().size(), wrappedIndex.value, leftButton, rightButton);
+            }
+        });
+
+        Button closeButton = (Button) imageDialog.findViewById(R.id.Full_image_close_button);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imgView.setImageURI(null);
+                imageDialog.dismiss();
+            }
+        });
+
     }
 
     public void editReminderSettings(View view) {
@@ -202,6 +256,29 @@ public class WelcomeActivity extends AppCompatActivity {
 
     public void goHome(View view) {
         //no need to do anything since we're already home
+    }
+
+    private void enableButtonsBasedOnIndex(int imagesSize, int index, ImageButton left, ImageButton right) {
+        if (index == 0) {
+            left.setEnabled(false);
+        }
+        if (index == imagesSize - 1) {
+            right.setEnabled(false);
+        }
+        if (index >= 0 && index < imagesSize - 1) {
+            right.setEnabled(true);
+        }
+        if (index > 0 && index <= imagesSize - 1) {
+            left.setEnabled(true);
+        }
+    }
+
+    private static class IntegerWrapper {
+        public int value;
+
+        public IntegerWrapper(int value) {
+            this.value = value;
+        }
     }
 
 }
