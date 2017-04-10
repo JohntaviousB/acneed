@@ -1,17 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.abusement.park.acneed.LoginActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Acneed"
+        android:id="@+id/Home_username"
+        android:layout_marginStart="32dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="28dp"/>
+
+    <EditText
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/Login_email_edit_text"
+        android:layout_below="@+id/Home_username"
+        android:layout_alignStart="@+id/Home_username"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="98dp"
+        android:hint="Email"
+        android:width="200dp"
+        android:singleLine="true"/>
+
+    <EditText
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/Login_password_edit_text"
+        android:layout_below="@+id/Login_email_edit_text"
+        android:layout_alignStart="@+id/Login_email_edit_text"
+        android:hint="Password"
+        android:width="200dp"
+        android:singleLine="true"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login"
+        android:id="@+id/Login_login_button"
+        android:layout_centerVertical="true"
+        android:layout_alignStart="@+id/Login_password_edit_text"
+        android:onClick="login"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Up"
+        android:id="@+id/Login_register_button"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/Login_login_button"
+        android:layout_marginStart="10dp"
+        android:onClick="register"/>
 </RelativeLayout>
