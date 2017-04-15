@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/images_list_image_view"/>
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Medium Text"
+        android:id="@+id/images_list_date_text"
+        android:layout_weight="0.25"
+        android:layout_marginStart="5dp"
+        android:textColor="#080101"/>
+
+    <CheckBox
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Include"
+        android:id="@+id/images_list_check_box"
+        android:layout_weight=".25"
+        android:checked="true"
+        android:textColor="#080101"/>
+</LinearLayout>
