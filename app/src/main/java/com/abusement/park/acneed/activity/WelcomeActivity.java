@@ -26,8 +26,6 @@ import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.utils.ImageCompressor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -84,8 +82,7 @@ public class WelcomeActivity extends AppCompatActivity {
         currentReminderFrequency = frequencyEditText.getText().toString();
         String email = firebaseAuth.getCurrentUser().getEmail();
         String defaultUsername = email.substring(0, email.indexOf('@'));
-        usernameText.setText(StringUtils.isBlank(firebaseAuth.getCurrentUser().getDisplayName())
-                ? defaultUsername : firebaseAuth.getCurrentUser().getDisplayName());
+        usernameText.setText(defaultUsername);
     }
 
     private void retrieveUser() {
@@ -102,12 +99,6 @@ public class WelcomeActivity extends AppCompatActivity {
                             for (Image image : user.getImages()) {
                                 addThumbnailToScrollView(Uri.parse(image.getUri()), index++);
                             }
-                        }
-                        try {
-                            Log.d(TAG, "Retrieved user: " + new ObjectMapper().writerWithDefaultPrettyPrinter()
-                                    .writeValueAsString(user));
-                        } catch (JsonProcessingException e) {
-                            Log.d(TAG, "Could not write the json for the user :(", e);
                         }
                     }
 
@@ -316,6 +307,10 @@ public class WelcomeActivity extends AppCompatActivity {
 
     public void goHome(View view) {
         //no need to do anything since we're already home
+    }
+
+    public void startMyJourneyActivity(View view) {
+        startActivity(new Intent(this, MyJourney.class));
     }
 
     private void enableButtonsBasedOnIndex(int imagesSize, int index, ImageButton left, ImageButton right) {

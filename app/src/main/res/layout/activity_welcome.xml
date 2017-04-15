@@ -41,7 +41,8 @@
         android:id="@+id/Home_my_journey_text"
         android:layout_below="@+id/Home_edit_profile"
         android:layout_alignStart="@+id/Home_edit_profile"
-        android:layout_marginTop="48dp"/>
+        android:layout_marginTop="48dp"
+        android:onClick="startMyJourneyActivity"/>
 
     <HorizontalScrollView
         android:layout_width="wrap_content"
