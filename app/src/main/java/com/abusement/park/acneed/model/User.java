@@ -33,6 +33,18 @@ public class User {
         images.add(image);
     }
 
+    public void removeImage(Image image) {
+        if (images != null) {
+            images.remove(image);
+        }
+    }
+
+    public void removeImage(int index) {
+        if (images != null) {
+            images.remove(index);
+        }
+    }
+
     public Settings getSettings() {
         return settings;
     }

@@ -1,10 +1,16 @@
 package com.abusement.park.acneed.activity;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -31,8 +37,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.text.format.DateFormat.getMediumDateFormat;
 
@@ -52,6 +63,8 @@ public class WelcomeActivity extends AppCompatActivity {
     private LinearLayout thumbnailsLayout;
 
     private String currentReminderFrequency;
+
+    private Uri capturedImageUri;
 
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1;
     private static final int THUMBNAIL_HEIGHT = 100;
@@ -117,33 +130,53 @@ public class WelcomeActivity extends AppCompatActivity {
         thumbnailsLayout.removeAllViews();
     }
 
+    private Uri createImageCaptureLocation()  {
+        File root = new File(Environment.getExternalStorageDirectory(), File.separator + "Acneed" + File.separator);
+        root.mkdirs();
+        String fname = "ACNEED" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        try {
+            return Uri.fromFile(File.createTempFile(fname, ".jpg", root));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void displayEditProfileDialog(View view) {
         // TODO: 3/25/2017
     }
 
     public void addImageToMyJourney(View view) {
-        Intent chooseImage;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            chooseImage = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            chooseImage.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        } else {
-            chooseImage = new Intent(Intent.ACTION_GET_CONTENT);
+        List<Intent> cameraIntents = new ArrayList<>();
+        Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        List<ResolveInfo> resInfo = getPackageManager().queryIntentActivities(captureIntent, 0);
+        capturedImageUri = createImageCaptureLocation();
+        for (ResolveInfo res : resInfo) {
+            Intent intent = new Intent(captureIntent);
+            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            intent.setPackage(res.activityInfo.packageName);
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
+            cameraIntents.add(intent);
         }
-        chooseImage.setType("image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(Intent.createChooser(chooseImage, "Select Image to Add to Journey"),
-                CHOOSE_IMAGE_REQUEST_CODE);
+        Intent galleryIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        galleryIntent.setType("image/*");
+        galleryIntent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        Intent chooser = Intent.createChooser(galleryIntent, "Select Source");
+        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+        startActivityForResult(chooser, CHOOSE_IMAGE_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
-            Log.d(TAG, "Choose Image Request completed with data " + data.getData());
-            int takeFlags = data.getFlags();
-            takeFlags &= Intent.FLAG_GRANT_READ_URI_PERMISSION;
-            getContentResolver().takePersistableUriPermission(data.getData(), takeFlags);
-            user.addImage(new Image(data.getData().toString(), new Date()));
-
-            //update the database to account for the new image
+            if (data != null && data.getAction() == null) {
+                int takeFlags = data.getFlags();
+                takeFlags &= Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                getContentResolver().takePersistableUriPermission(data.getData(), takeFlags);
+                user.addImage(new Image(data.getData().toString(), new Date()));
+            } else {
+                user.addImage(new Image(capturedImageUri.toString(), new Date()));
+            }
             databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
         }
     }
@@ -163,13 +196,40 @@ public class WelcomeActivity extends AppCompatActivity {
         newThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayDialog(v, index);
+                displayImageDialog(v, index);
+            }
+        });
+        newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return displayDeleteDialog(index);
             }
         });
         thumbnailsLayout.addView(newThumbnail);
     }
 
-    private void displayDialog(View v, int index) {
+    private boolean displayDeleteDialog(final int index) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeActivity.this);
+        builder.setTitle("Delete this image?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        user.removeImage(index);
+                        databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .show();
+        return true;
+    }
+
+    private void displayImageDialog(View v, int index) {
         final Dialog imageDialog = new Dialog(this);
         imageDialog.setContentView(R.layout.full_image_dialog);
         imageDialog.show();
