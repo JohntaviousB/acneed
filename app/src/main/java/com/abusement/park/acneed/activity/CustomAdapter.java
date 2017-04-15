@@ -18,17 +18,18 @@ import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.utils.ImageCompressor;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.text.format.DateFormat.getMediumDateFormat;
 
 public class CustomAdapter<T> extends ArrayAdapter<Image> {
 
     private static final String TAG = "CUSTOM_ADAPTER";
-
     private static LruCache<String, Bitmap> thumbnailCache;
-
     private static final int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024);
+    private static final Map<String, Boolean> checkedRows = new HashMap<>();
 
     static {
         if (thumbnailCache == null) {
@@ -60,10 +61,22 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.images_list_image_view);
         TextView dateTextView = (TextView) customView.findViewById(R.id.images_list_date_text);
+        final CheckBox includeCheckBox = (CheckBox) customView.findViewById(R.id.images_list_check_box);
 
         dateTextView.setText(getMediumDateFormat(super.getContext()).format(image.getUploadDate()));
         try {
-            String uri = image.getUri();
+            final String uri = image.getUri();
+            if (!checkedRows.containsKey(uri)) {
+                checkedRows.put(uri, true);
+            } else {
+                includeCheckBox.setChecked(checkedRows.get(uri));
+            }
+            includeCheckBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkedRows.put(uri, !checkedRows.get(uri));
+                }
+            });
             Bitmap bitmap;
             if ((bitmap = thumbnailCache.get(uri)) == null) {
                 bitmap = ImageCompressor.compressImageToThumbnail(
