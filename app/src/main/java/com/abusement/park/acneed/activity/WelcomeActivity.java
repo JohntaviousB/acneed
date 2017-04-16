@@ -310,7 +310,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     public void startMyJourneyActivity(View view) {
-        startActivity(new Intent(this, MyJourney.class));
+        startActivity(new Intent(this, MyJourneyActivity.class));
     }
 
     private void enableButtonsBasedOnIndex(int imagesSize, int index, ImageButton left, ImageButton right) {

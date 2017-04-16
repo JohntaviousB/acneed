@@ -35,5 +35,6 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:10.2.0'
     compile 'com.google.firebase:firebase-database:10.2.0'
     compile 'com.google.firebase:firebase-storage:10.2.0'
+    compile 'org.jcodec:jcodec-android:0.1.9'
 }
 apply plugin: 'com.google.gms.google-services'
