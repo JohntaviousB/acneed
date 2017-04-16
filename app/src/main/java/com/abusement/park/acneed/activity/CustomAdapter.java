@@ -18,7 +18,8 @@ import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.utils.ImageCompressor;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
     private static final String TAG = "CUSTOM_ADAPTER";
     private static LruCache<String, Bitmap> thumbnailCache;
     private static final int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024);
-    private static final Map<String, Boolean> checkedRows = new HashMap<>();
+    private static final Map<Image, Boolean> checkedRows = new LinkedHashMap<>();
 
     static {
         if (thumbnailCache == null) {
@@ -48,6 +49,16 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
         }
     }
 
+    public static List<Image> imagesToInclude() {
+        List<Image> result = new ArrayList<>();
+        for (Map.Entry<Image, Boolean > entry : checkedRows.entrySet()) {
+            if (entry.getValue()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
     public CustomAdapter(Context context, int resource, List<Image> objects) {
         super(context, resource, objects);
     }
@@ -57,7 +68,7 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
         LayoutInflater inflater = LayoutInflater.from(super.getContext());
         View customView = convertView == null ? inflater.inflate(R.layout.images_list_item, parent, false) :
                 convertView;
-        Image image = super.getItem(position);
+        final Image image = super.getItem(position);
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.images_list_image_view);
         TextView dateTextView = (TextView) customView.findViewById(R.id.images_list_date_text);
@@ -66,15 +77,15 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
         dateTextView.setText(getMediumDateFormat(super.getContext()).format(image.getUploadDate()));
         try {
             final String uri = image.getUri();
-            if (!checkedRows.containsKey(uri)) {
-                checkedRows.put(uri, true);
+            if (!checkedRows.containsKey(image)) {
+                checkedRows.put(image, true);
             } else {
-                includeCheckBox.setChecked(checkedRows.get(uri));
+                includeCheckBox.setChecked(checkedRows.get(image));
             }
             includeCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    checkedRows.put(uri, !checkedRows.get(uri));
+                    checkedRows.put(image, !checkedRows.get(image));
                 }
             });
             Bitmap bitmap;

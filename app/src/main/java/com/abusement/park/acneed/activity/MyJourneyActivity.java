@@ -1,18 +1,27 @@
 package com.abusement.park.acneed.activity;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
+import com.abusement.park.acneed.utils.CustomSequenceEncoder;
+import com.abusement.park.acneed.utils.ImageCompressor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,7 +29,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class MyJourney extends AppCompatActivity {
+import org.jcodec.scale.BitmapUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+public class MyJourneyActivity extends AppCompatActivity {
 
     private static final String TAG = "MY_JOURNEY";
 
@@ -31,6 +47,7 @@ public class MyJourney extends AppCompatActivity {
 
     private ArrayAdapter<Image> adapter;
     private ListView imageListView;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +59,8 @@ public class MyJourney extends AppCompatActivity {
             logout(null);
         }
         imageListView = (ListView) findViewById(R.id.My_journey_listview);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
         retrieveUser();
     }
 
@@ -72,8 +91,9 @@ public class MyJourney extends AppCompatActivity {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        createVideo();
-                        dialog.dismiss();
+                        /* Create journey in a background thread */
+                        progressBar.setVisibility(View.VISIBLE);
+                        new CreateVideoTask().execute(CustomAdapter.imagesToInclude());
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -85,9 +105,6 @@ public class MyJourney extends AppCompatActivity {
                 .show();
     }
 
-    private void createVideo() {
-    }
-
     public void logout(View view) {
         finish();
         firebaseAuth.signOut();
@@ -97,5 +114,46 @@ public class MyJourney extends AppCompatActivity {
     public void goHome(View view) {
         finish();
         startActivity(new Intent(this, WelcomeActivity.class));
+    }
+
+    private class CreateVideoTask extends AsyncTask<List<Image>, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(List<Image>... params) {
+            int completedImages = 0;
+            try {
+                CustomSequenceEncoder sequenceEncoder = new CustomSequenceEncoder(new File(Environment.getExternalStorageDirectory(), "output.mp4"));
+                for (Image image : params[0]) {
+                    Log.d(TAG, "Trying to add image " + image.getUri());
+                    Uri uri = Uri.parse(image.getUri());
+                    ContentResolver cr = MyJourneyActivity.this.getContentResolver();
+                    InputStream is = cr.openInputStream(uri);
+                    Bitmap frame = ImageCompressor.compressImageToThumbnail(uri, cr, 400, 400);
+                    is.close();
+                    Log.d(TAG, "Encoding image");
+                    sequenceEncoder.encodeNativeFrame(BitmapUtil.fromBitmap(frame));
+                    publishProgress(++completedImages, params[0].size());
+                }
+                sequenceEncoder.finish();
+                Log.d(TAG, "Sequence Encoder finished");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return (null);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            int numerator = values[0];
+            int denom = values[1];
+            progressBar.setProgress((int) (1.0 * numerator / denom * 100));
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressBar.setProgress(0);
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(MyJourneyActivity.this.getApplicationContext(), "Video complete", Toast.LENGTH_LONG).show();
+        }
     }
 }

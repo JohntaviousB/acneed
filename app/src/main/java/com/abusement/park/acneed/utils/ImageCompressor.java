@@ -24,7 +24,7 @@ public class ImageCompressor {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inTempStorage = new byte[24 * 1024];
         options.inJustDecodeBounds = false;
-        options.inSampleSize = 4;
+        options.inSampleSize = 2;
         Bitmap bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(filepath), null, options);
         return ThumbnailUtils.extractThumbnail(bitmap, width, height);
     }
