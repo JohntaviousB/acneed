@@ -11,10 +11,12 @@ public class User {
     private String email;
     private String password;
     private List<Image> images;
+    private List<Video> videos;
     private Settings settings;
 
     public User() {
         images = new ArrayList<>();
+        videos = new ArrayList<>();
         settings = Settings.DEFAULT_SETTINGS;
     }
 
@@ -45,6 +47,33 @@ public class User {
         }
     }
 
+    public List<Video> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(List<Video> videos) {
+        this.videos = videos;
+    }
+
+    public void addVideo(Video toAdd) {
+        if (videos == null) {
+            videos = new ArrayList<>();
+        }
+        videos.add(toAdd);
+    }
+
+    public void removeVideo(int index) {
+        if (videos != null) {
+            videos.remove(index);
+        }
+    }
+
+    public void removeVideo(Video toRemove) {
+        if (videos != null){
+            videos.remove(toRemove);
+        }
+    }
+
     public Settings getSettings() {
         return settings;
     }
@@ -52,10 +81,6 @@ public class User {
     public void setSettings(Settings settings) {
         this.settings = settings;
     }
-
-//    public static User.Builder builder() {
-//        return new User.Builder();
-//    }
 
     public String getUid() {
         return uid;
@@ -107,41 +132,4 @@ public class User {
         return Objects.hash(uid);
     }
 
-//    public static class Builder {
-//        private User user;
-//
-//        public Builder() {
-//            user = new User();
-//        }
-//
-//        public Builder email(String email) {
-//            user.email = email;
-//            return this;
-//        }
-//
-//        public Builder uid(String uid) {
-//            user.uid = uid;
-//            return this;
-//        }
-//
-//        public Builder password(String password) {
-//            user.password = password;
-//            return this;
-//        }
-//
-//        public Builder images(List<Image> images) {
-//            user.images = images;
-//            return  this;
-//        }
-//
-//        public Builder settings(Settings settings) {
-//            user.settings = settings;
-//            return this;
-//        }
-//
-//        public User build() {
-//            return user;
-//        }
-//
-//    }
 }
