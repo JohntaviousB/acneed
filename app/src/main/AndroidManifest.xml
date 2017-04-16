@@ -27,6 +27,8 @@
         </activity>
         <activity android:name=".activity.MyJourneyActivity">
         </activity>
+        <activity android:name=".activity.ViewVideoActivity">
+        </activity>
     </application>
 
 </manifest>

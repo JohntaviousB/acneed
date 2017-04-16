@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
+import com.abusement.park.acneed.model.Video;
 import com.abusement.park.acneed.utils.CustomSequenceEncoder;
 import com.abusement.park.acneed.utils.ImageCompressor;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +35,7 @@ import org.jcodec.scale.BitmapUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 public class MyJourneyActivity extends AppCompatActivity {
@@ -116,15 +118,16 @@ public class MyJourneyActivity extends AppCompatActivity {
         startActivity(new Intent(this, WelcomeActivity.class));
     }
 
-    private class CreateVideoTask extends AsyncTask<List<Image>, Integer, Void> {
+    private class CreateVideoTask extends AsyncTask<List<Image>, Integer, File> {
 
         @Override
-        protected Void doInBackground(List<Image>... params) {
+        protected File doInBackground(List<Image>... params) {
             int completedImages = 0;
+            File video = null;
             try {
                 File root = new File(Environment.getExternalStorageDirectory(), File.separator + "Acneed" + File.separator);
                 root.mkdirs();
-                File video = File.createTempFile("MyJourney", ".mp4", root);
+                video = File.createTempFile("MyJourney", ".mp4", root);
                 CustomSequenceEncoder sequenceEncoder = new CustomSequenceEncoder(video);
                 for (Image image : params[0]) {
                     Log.d(TAG, "Trying to add image " + image.getUri());
@@ -142,7 +145,7 @@ public class MyJourneyActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return (null);
+            return video;
         }
 
         @Override
@@ -153,10 +156,12 @@ public class MyJourneyActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(File video) {
             progressBar.setProgress(0);
             progressBar.setVisibility(View.GONE);
             Toast.makeText(MyJourneyActivity.this.getApplicationContext(), "Video complete", Toast.LENGTH_LONG).show();
+            currentUser.addVideo(new Video(Uri.fromFile(video).toString(), new Date(), video.getPath()));
+            databaseReference.child("users").child(currentUser.getUid()).setValue(currentUser);
         }
     }
 }

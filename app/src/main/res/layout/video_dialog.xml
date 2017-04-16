@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/Full_image_linear_layout">
+            android:id="@+id/full_video_linear_layout">
 
             <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/Full_image_left_button"
+                android:id="@+id/full_video_left_button"
                 android:background="@android:color/transparent"
                 android:src="@drawable/left"
                 android:layout_alignParentTop="true"
@@ -26,7 +26,7 @@
             <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/Full_image_right_button"
+                android:id="@+id/full_video_right_button"
                 android:src="@drawable/right"
                 android:background="@android:color/transparent"
                 android:layout_alignParentTop="true"
@@ -39,31 +39,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="CLOSE"
-            android:id="@+id/Full_image_close_button"
+            android:id="@+id/full_video_close_button"
             android:layout_below="@+id/full_video_view"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginTop="5dp"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Date"
-            android:layout_below="@id/Full_image_linear_layout"
+            android:layout_below="@id/full_video_linear_layout"
             android:layout_centerHorizontal="true"
-            android:id="@+id/Full_image_date_text"/>
+            android:id="@+id/full_video_date_text"/>
 
 
-        <ImageView
-            android:layout_width="wrap_content"
+        <VideoView
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/full_video_view"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/Full_image_date_text"
+            android:layout_below="@id/full_video_date_text"
             android:layout_marginTop="1dp"
-            android:adjustViewBounds="true"
-            android:maxWidth="275dp"
-            android:maxHeight="350dp"/>
+            android:backgroundTint="#000000"/>
 
     </RelativeLayout>
 </LinearLayout>

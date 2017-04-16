@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,13 +20,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
+import com.abusement.park.acneed.model.Video;
 import com.abusement.park.acneed.utils.ImageCompressor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -58,7 +64,9 @@ public class WelcomeActivity extends AppCompatActivity {
     private TextView editReminderSettingsTextView;
     private TextView saveReminderSettingsTextView;
     private TextView usernameText;
-    private LinearLayout thumbnailsLayout;
+    private LinearLayout imagesThumbnailsLayout;
+    private LinearLayout videoThumbnailsLayout;
+    private MediaController mediaController;
 
     private String currentReminderFrequency;
 
@@ -97,7 +105,11 @@ public class WelcomeActivity extends AppCompatActivity {
                             clearThumbnails();
                             int index = 0;
                             for (Image image : user.getImages()) {
-                                addThumbnailToScrollView(Uri.parse(image.getUri()), index++);
+                                addImageThumbnailToScrollView(Uri.parse(image.getUri()), index++);
+                            }
+                            index = 0;
+                            for (Video video : user.getVideos()) {
+                                addVideoThumbnailToScrollView(Uri.parse(video.getUri()), video.getFilePath(), index++);
                             }
                         }
                     }
@@ -114,11 +126,14 @@ public class WelcomeActivity extends AppCompatActivity {
         frequencyEditText = (EditText) findViewById(R.id.Home_frequency_edit_text);
         editReminderSettingsTextView = (TextView) findViewById(R.id.Home_edit_reminder_edit_text);
         saveReminderSettingsTextView = (TextView) findViewById(R.id.Home_save_reminder_changes);
-        thumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
+        imagesThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
+        videoThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_videos_linear_layout);
+        mediaController = new MediaController(WelcomeActivity.this);
     }
 
     private void clearThumbnails() {
-        thumbnailsLayout.removeAllViews();
+        imagesThumbnailsLayout.removeAllViews();
+        videoThumbnailsLayout.removeAllViews();
     }
 
     private Uri createImageCaptureLocation()  {
@@ -168,11 +183,11 @@ public class WelcomeActivity extends AppCompatActivity {
             } else {
                 user.addImage(new Image(capturedImageUri.toString(), new Date()));
             }
-            databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
+            databaseReference.child("users").child(user.getUid()).setValue(user);
         }
     }
 
-    private void addThumbnailToScrollView(Uri imageUri, final int index) {
+    private void addImageThumbnailToScrollView(Uri imageUri, final int index) {
         ImageView newThumbnail = new ImageView(this);
         Log.d(TAG, "Attempting to compress Image " + imageUri);
         try {
@@ -183,30 +198,67 @@ public class WelcomeActivity extends AppCompatActivity {
             Toast.makeText(this, "Failed to upload image.", Toast.LENGTH_LONG).show();
         }
         Log.d(TAG, "Image compression succeeded. Setting layout and adding to layout");
-        newThumbnail.setLayoutParams(new LinearLayout.LayoutParams(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+        layoutParams.setMarginEnd(5);
+        newThumbnail.setLayoutParams(layoutParams);
         newThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayImageDialog(v, index);
+                displayImageDialog(index);
             }
         });
         newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                return displayDeleteDialog(index);
+                return displayDeleteDialog(index, true);
             }
         });
-        thumbnailsLayout.addView(newThumbnail);
+        imagesThumbnailsLayout.addView(newThumbnail);
     }
 
-    private boolean displayDeleteDialog(final int index) {
+    private void addVideoThumbnailToScrollView(Uri videoUri, String filepath,  final int index) {
+        ImageView newThumbnail = new ImageView(this);
+        newThumbnail.setImageBitmap(ThumbnailUtils.createVideoThumbnail(filepath, MediaStore.Images.Thumbnails.MICRO_KIND));
+//        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(512, 384);
+//        layoutParams.setMarginEnd(10);
+//        newThumbnail.setLayoutParams(layoutParams);
+        newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                displayDeleteDialog(index, false);
+                return true;
+            }
+        });
+        newThumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent viewVideo = new Intent(WelcomeActivity.this, ViewVideoActivity.class);
+                viewVideo.putExtra("selected_index", index);
+                String userString = "";
+                try {
+                    userString = new ObjectMapper().writeValueAsString(user);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                viewVideo.putExtra("user", userString);
+                startActivity(viewVideo);
+            }
+        });
+        videoThumbnailsLayout.addView(newThumbnail);
+    }
+
+    private boolean displayDeleteDialog(final int index, final boolean image) {
         AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeActivity.this);
-        builder.setTitle("Delete this image?")
+        builder.setTitle("Delete?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        user.removeImage(index);
-                        databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(user);
+                        if (image) {
+                            user.removeImage(index);
+                        } else {
+                            user.removeVideo(index);
+                        }
+                        databaseReference.child("users").child(user.getUid()).setValue(user);
                         dialog.dismiss();
                     }
                 })
@@ -220,12 +272,13 @@ public class WelcomeActivity extends AppCompatActivity {
         return true;
     }
 
-    private void displayImageDialog(View v, int index) {
+
+    private void displayImageDialog(int index) {
         final Dialog imageDialog = new Dialog(this);
         imageDialog.setContentView(R.layout.full_image_dialog);
         imageDialog.show();
 
-        final ImageView imgView = (ImageView) imageDialog.findViewById(R.id.Full_image_image_view);
+        final ImageView imgView = (ImageView) imageDialog.findViewById(R.id.full_video_view);
         imgView.setImageURI(Uri.parse(user.getImages().get(index).getUri()));
         final ImageButton leftButton = (ImageButton) imageDialog.findViewById(R.id.Full_image_left_button);
         final ImageButton rightButton = (ImageButton) imageDialog.findViewById(R.id.Full_image_right_button);
@@ -313,17 +366,17 @@ public class WelcomeActivity extends AppCompatActivity {
         startActivity(new Intent(this, MyJourneyActivity.class));
     }
 
-    private void enableButtonsBasedOnIndex(int imagesSize, int index, ImageButton left, ImageButton right) {
+    protected static void enableButtonsBasedOnIndex(int listSize, int index, ImageButton left, ImageButton right) {
         if (index == 0) {
             left.setEnabled(false);
         }
-        if (index == imagesSize - 1) {
+        if (index == listSize - 1) {
             right.setEnabled(false);
         }
-        if (index >= 0 && index < imagesSize - 1) {
+        if (index >= 0 && index < listSize - 1) {
             right.setEnabled(true);
         }
-        if (index > 0 && index <= imagesSize - 1) {
+        if (index > 0 && index <= listSize - 1) {
             left.setEnabled(true);
         }
     }
