@@ -86,23 +86,23 @@ public class MyJourneyActivity extends AppCompatActivity {
 
     public void displayConfirmVideoDialog(View view) {
         new AlertDialog.Builder(view.getContext())
-                .setTitle("Create Your Journey?")
-                .setMessage("The selected ictures will be included in your journey.")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        /* Create journey in a background thread */
-                        progressBar.setVisibility(View.VISIBLE);
-                        new CreateVideoTask().execute(CustomAdapter.imagesToInclude());
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .show();
+            .setTitle("Create Your Journey?")
+            .setMessage("The selected ictures will be included in your journey.")
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    /* Create journey in a background thread */
+                    progressBar.setVisibility(View.VISIBLE);
+                    new CreateVideoTask().execute(CustomAdapter.imagesToInclude(currentUser));
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            })
+            .show();
     }
 
     public void logout(View view) {
@@ -122,7 +122,10 @@ public class MyJourneyActivity extends AppCompatActivity {
         protected Void doInBackground(List<Image>... params) {
             int completedImages = 0;
             try {
-                CustomSequenceEncoder sequenceEncoder = new CustomSequenceEncoder(new File(Environment.getExternalStorageDirectory(), "output.mp4"));
+                File root = new File(Environment.getExternalStorageDirectory(), File.separator + "Acneed" + File.separator);
+                root.mkdirs();
+                File video = File.createTempFile("MyJourney", ".mp4", root);
+                CustomSequenceEncoder sequenceEncoder = new CustomSequenceEncoder(video);
                 for (Image image : params[0]) {
                     Log.d(TAG, "Trying to add image " + image.getUri());
                     Uri uri = Uri.parse(image.getUri());

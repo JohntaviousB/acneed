@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
+import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.utils.ImageCompressor;
 
 import java.io.FileNotFoundException;
@@ -49,11 +50,21 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
         }
     }
 
-    public static List<Image> imagesToInclude() {
+    public static List<Image> imagesToInclude(User user) {
         List<Image> result = new ArrayList<>();
         for (Map.Entry<Image, Boolean > entry : checkedRows.entrySet()) {
             if (entry.getValue()) {
                 result.add(entry.getKey());
+            }
+        }
+
+        /* There's a chance the listView did not include all the images b/c the
+            user did not scroll, so we'll just add the rest of the images not already
+            in the map
+         */
+        for (Image image : user.getImages()) {
+            if (!checkedRows.containsKey(image)) {
+                result.add(image);
             }
         }
         return result;
