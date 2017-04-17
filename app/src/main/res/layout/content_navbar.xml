@@ -9,16 +9,25 @@
         android:layout_height="wrap_content"
         android:id="@+id/home"
         android:src="@drawable/home"
-        android:layout_weight=".5"
+        android:layout_weight="0.333"
         android:background="@android:color/transparent"
         android:onClick="goHome"/>
 
     <ImageButton
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:id="@+id/ideas"
+        android:layout_weight="0.333"
+        android:src="@drawable/idea"
+        android:background="@android:color/transparent"
+        android:onClick="goToIdeas"/>
+
+    <ImageButton
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:id="@+id/logout"
         android:src="@drawable/logout"
-        android:layout_weight=".5"
+        android:layout_weight="0.333"
         android:background="@android:color/transparent"
         android:onClick="logout"/>
 </LinearLayout>

@@ -29,6 +29,10 @@
         </activity>
         <activity android:name=".activity.ViewVideoActivity">
         </activity>
+        <activity android:name=".activity.SuggestionsActivity">
+        </activity>
+        <activity android:name=".activity.PostSuggestionActivity">
+        </activity>
     </application>
 
 </manifest>

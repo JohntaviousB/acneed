@@ -362,6 +362,10 @@ public class WelcomeActivity extends AppCompatActivity {
         //no need to do anything since we're already home
     }
 
+    public void goToIdeas(View view) {
+
+    }
+
     public void startMyJourneyActivity(View view) {
         startActivity(new Intent(this, MyJourneyActivity.class));
     }
