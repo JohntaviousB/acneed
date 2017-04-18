@@ -34,7 +34,6 @@ import org.jcodec.scale.BitmapUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -73,7 +72,7 @@ public class MyJourneyActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         currentUser = dataSnapshot.getValue(User.class);
                         if (currentUser != null && adapter == null) {
-                            adapter = new CustomAdapter<>(getApplicationContext(), R.layout.images_list_item,
+                            adapter = new CustomImageAdapter(getApplicationContext(), R.layout.images_list_item,
                                     currentUser.getImages());
                             imageListView.setAdapter(adapter);
                         }
@@ -95,7 +94,7 @@ public class MyJourneyActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     /* Create journey in a background thread */
                     progressBar.setVisibility(View.VISIBLE);
-                    new CreateVideoTask().execute(CustomAdapter.imagesToInclude(currentUser));
+                    new CreateVideoTask().execute(CustomImageAdapter.imagesToInclude(currentUser));
                 }
             })
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -118,10 +117,16 @@ public class MyJourneyActivity extends AppCompatActivity {
         startActivity(new Intent(this, WelcomeActivity.class));
     }
 
+    public void goToIdeas(View view) {
+        finish();
+        startActivity(new Intent(this, ViewSuggestionsActivity.class));
+    }
+
     private class CreateVideoTask extends AsyncTask<List<Image>, Integer, File> {
 
+        @SafeVarargs
         @Override
-        protected File doInBackground(List<Image>... params) {
+        protected final File doInBackground(List<Image>... params) {
             int completedImages = 0;
             File video = null;
             try {
@@ -133,9 +138,7 @@ public class MyJourneyActivity extends AppCompatActivity {
                     Log.d(TAG, "Trying to add image " + image.getUri());
                     Uri uri = Uri.parse(image.getUri());
                     ContentResolver cr = MyJourneyActivity.this.getContentResolver();
-                    InputStream is = cr.openInputStream(uri);
                     Bitmap frame = ImageCompressor.compressImageToThumbnail(uri, cr, 400, 400);
-                    is.close();
                     Log.d(TAG, "Encoding image");
                     sequenceEncoder.encodeNativeFrame(BitmapUtil.fromBitmap(frame));
                     publishProgress(++completedImages, params[0].size());

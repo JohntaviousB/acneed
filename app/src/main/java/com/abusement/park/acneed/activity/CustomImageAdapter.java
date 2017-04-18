@@ -26,7 +26,7 @@ import java.util.Map;
 
 import static android.text.format.DateFormat.getMediumDateFormat;
 
-public class CustomAdapter<T> extends ArrayAdapter<Image> {
+public class CustomImageAdapter extends ArrayAdapter<Image> {
 
     private static final String TAG = "CUSTOM_ADAPTER";
     private static LruCache<String, Bitmap> thumbnailCache;
@@ -70,7 +70,7 @@ public class CustomAdapter<T> extends ArrayAdapter<Image> {
         return result;
     }
 
-    public CustomAdapter(Context context, int resource, List<Image> objects) {
+    public CustomImageAdapter(Context context, int resource, List<Image> objects) {
         super(context, resource, objects);
     }
 
