@@ -118,7 +118,8 @@ public class MyJourneyActivity extends AppCompatActivity {
     }
 
     public void goToIdeas(View view) {
-
+        finish();
+        startActivity(new Intent(this, ViewSuggestionsActivity.class));
     }
 
     private class CreateVideoTask extends AsyncTask<List<Image>, Integer, File> {

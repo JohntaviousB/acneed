@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.abusement.park.acneed.R;
 
-public class SuggestionsActivity extends AppCompatActivity {
+public class ViewSuggestionsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

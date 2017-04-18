@@ -23,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.abusement.park.acneed.R;
 import com.abusement.park.acneed.model.Image;
@@ -218,10 +217,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void addVideoThumbnailToScrollView(Uri videoUri, String filepath,  final int index) {
         ImageView newThumbnail = new ImageView(this);
-        newThumbnail.setImageBitmap(ThumbnailUtils.createVideoThumbnail(filepath, MediaStore.Images.Thumbnails.MICRO_KIND));
-//        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(512, 384);
-//        layoutParams.setMarginEnd(10);
-//        newThumbnail.setLayoutParams(layoutParams);
+        newThumbnail.setImageBitmap(ThumbnailUtils.createVideoThumbnail(filepath, MediaStore.Images.Thumbnails
+                .MICRO_KIND));
         newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -362,8 +359,13 @@ public class WelcomeActivity extends AppCompatActivity {
         //no need to do anything since we're already home
     }
 
-    public void goToIdeas(View view) {
+    public void goToPostSuggestion(View view) {
+        finish();
+        startActivity(new Intent(this, PostSuggestionActivity.class));
+    }
 
+    public void goToIdeas(View view) {
+        startActivity(new Intent(this, ViewSuggestionsActivity.class));
     }
 
     public void startMyJourneyActivity(View view) {

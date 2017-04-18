@@ -12,11 +12,12 @@ public class Suggestion {
     private Date creationDate;
     private int downVotes;
     private int upVotes;
-    private UUID uuid;
+    private String id;
 
     public Suggestion() {
         downVotes = upVotes = 0; // Java initializes these to 0 by default, but this is for clarity
-        uuid = UUID.randomUUID();
+        creationDate = new Date();
+        id = creationDate.getTime() + "";
     }
 
     public Suggestion(String user, String title, String details) {
@@ -24,8 +25,8 @@ public class Suggestion {
         this.user = user;
         this.title = title;
         this.details = details;
-        this.uuid = UUID.randomUUID();
         creationDate = new Date();
+        this.id = "" + creationDate.getTime() + user;
     }
 
     public String getUser() {
@@ -76,12 +77,12 @@ public class Suggestion {
         this.creationDate = new Date(date.getTime());
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public int calculateUpVotePercent() {
@@ -101,12 +102,12 @@ public class Suggestion {
             return false;
         }
         Suggestion that = (Suggestion) obj;
-        return Objects.equals(uuid, that.uuid);
+        return Objects.equals(id, that.id);
 
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid);
+        return Objects.hash(id);
     }
 }

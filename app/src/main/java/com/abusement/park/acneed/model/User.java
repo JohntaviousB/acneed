@@ -12,11 +12,13 @@ public class User {
     private String password;
     private List<Image> images;
     private List<Video> videos;
+    private List<Suggestion> suggestions;
     private Settings settings;
 
     public User() {
         images = new ArrayList<>();
         videos = new ArrayList<>();
+        suggestions = new ArrayList<>();
         settings = Settings.DEFAULT_SETTINGS;
     }
 
@@ -25,6 +27,8 @@ public class User {
         this.password = password;
         this.uid = uid;
         images = new ArrayList<>();
+        videos = new ArrayList<>();
+        suggestions = new ArrayList<>();
         settings = Settings.DEFAULT_SETTINGS;
     }
 
@@ -72,6 +76,33 @@ public class User {
         if (videos != null){
             videos.remove(toRemove);
         }
+    }
+
+    public void addSuggestion(Suggestion suggestion) {
+        if (suggestions == null) {
+            suggestions = new ArrayList<>();
+        }
+        suggestions.add(suggestion);
+    }
+
+    public void removeSuggestion(Suggestion suggestion) {
+        if (suggestions != null) {
+            suggestions.remove(suggestion);
+        }
+    }
+
+    public void removeSuggestion(int index) {
+        if (suggestions != null) {
+            suggestions.remove(index);
+        }
+    }
+
+    public List<Suggestion> getSuggestions() {
+        return suggestions;
+    }
+
+    public void setSuggestions(List<Suggestion> suggestions) {
+        this.suggestions = suggestions;
     }
 
     public Settings getSettings() {
