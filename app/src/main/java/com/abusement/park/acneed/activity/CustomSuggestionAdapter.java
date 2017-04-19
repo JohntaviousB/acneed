@@ -1,7 +1,6 @@
 package com.abusement.park.acneed.activity;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -29,7 +28,7 @@ public class CustomSuggestionAdapter extends ArrayAdapter<Suggestion> {
 
         /* Todo: maybe use a bar instead of just a raw percentage */
         percentTextView.setText(suggestion.calculateUpVotePercent() + "% approve");
-        totalVotesTextView.setText(suggestion.getTotalVotes() + " votes");
+        totalVotesTextView.setText(suggestion.totalVotes() + " votes");
         subjectTextView.setText(suggestion.getTitle());
 
         return  customView;

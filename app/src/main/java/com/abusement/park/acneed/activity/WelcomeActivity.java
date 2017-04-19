@@ -269,7 +269,6 @@ public class WelcomeActivity extends AppCompatActivity {
         return true;
     }
 
-
     private void displayImageDialog(int index) {
         final Dialog imageDialog = new Dialog(this);
         imageDialog.setContentView(R.layout.full_image_dialog);
@@ -350,9 +349,9 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     public void logout(View view) {
-        finish();
         firebaseAuth.signOut();
         startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     public void goHome(View view) {
@@ -360,12 +359,11 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     public void goToPostSuggestion(View view) {
-        finish();
         startActivity(new Intent(this, PostSuggestionActivity.class));
     }
 
     public void goToIdeas(View view) {
-        startActivity(new Intent(this, ViewSuggestionsActivity.class));
+        startActivity(new Intent(this, SuggestionsTabbedActivity.class));
     }
 
     public void startMyJourneyActivity(View view) {

@@ -58,8 +58,8 @@ public class LoginActivity extends AppCompatActivity {
                 public void onComplete(Task<AuthResult> task) {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
-                        finish();
                         startActivity(new Intent(LoginActivity.this, WelcomeActivity.class));
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Invalid login credentials!", Toast
                                 .LENGTH_LONG).show();
