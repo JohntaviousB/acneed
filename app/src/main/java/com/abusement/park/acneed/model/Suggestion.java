@@ -17,7 +17,6 @@ public class Suggestion {
     public Suggestion() {
         downVotes = upVotes = 0; // Java initializes these to 0 by default, but this is for clarity
         creationDate = new Date();
-        id = creationDate.getTime() + "";
     }
 
     public Suggestion(String user, String title, String details) {
@@ -26,7 +25,6 @@ public class Suggestion {
         this.title = title;
         this.details = details;
         creationDate = new Date();
-        this.id = "" + creationDate.getTime() + user;
     }
 
     public String getUser() {
@@ -89,7 +87,7 @@ public class Suggestion {
         return (int) ( (1.0 * upVotes / (upVotes + downVotes)) * 100);
     }
 
-    public int getTotalVotes() {
+    public int totalVotes() {
         return upVotes + downVotes;
     }
 
@@ -102,12 +100,14 @@ public class Suggestion {
             return false;
         }
         Suggestion that = (Suggestion) obj;
-        return Objects.equals(id, that.id);
+        return Objects.equals(user, that.user)
+                && Objects.equals(title, that.title)
+                && Objects.equals(creationDate, that.creationDate);
 
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(user, title, creationDate);
     }
 }

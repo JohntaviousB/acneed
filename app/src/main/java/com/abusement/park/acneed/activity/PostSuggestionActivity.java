@@ -85,7 +85,9 @@ public class PostSuggestionActivity extends AppCompatActivity {
             Suggestion suggestion = new Suggestion(currentUser.getUid(), subject, description);
             Log.d(TAG, "Posting suggestion: " + subject);
             ProgressDialog modal = displayProgressDialog();
-            databaseReference.child("suggestions").child(suggestion.getId()).setValue(suggestion);
+            DatabaseReference dbReference  = databaseReference.child("suggestions").push();
+            suggestion.setId(dbReference.getKey());
+            dbReference.setValue(suggestion);
             currentUser.addSuggestion(suggestion);
             databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid()).setValue(currentUser);
             modal.dismiss();
@@ -110,19 +112,19 @@ public class PostSuggestionActivity extends AppCompatActivity {
     }
 
     public void logout(View view) {
-        finish();
         firebaseAuth.signOut();
         startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     public void goHome(View view) {
-        finish();
         startActivity(new Intent(this, WelcomeActivity.class));
+        finish();
     }
 
     public void goToIdeas(View view) {
+        startActivity(new Intent(this, SuggestionsTabbedActivity.class));
         finish();
-        startActivity(new Intent(this, ViewSuggestionsActivity.class));
     }
 
 }

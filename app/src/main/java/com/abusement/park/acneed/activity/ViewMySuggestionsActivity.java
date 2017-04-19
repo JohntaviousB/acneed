@@ -5,11 +5,11 @@ import android.os.Bundle;
 
 import com.abusement.park.acneed.R;
 
-public class ViewSuggestionsActivity extends AppCompatActivity {
+public class ViewMySuggestionsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_suggestions);
+        setContentView(R.layout.activity_view_my_suggestions);
     }
 }
