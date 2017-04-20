@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.abusement.park.acneed.activity.SuggestionDetailViewActivity">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView3">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/content_navbar"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/include"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="username"
+                android:id="@+id/Suggestion_poster_username_text_view"
+                android:layout_below="@+id/include"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_alignParentStart="true"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Medium Text"
+                android:id="@+id/Suggestion_details_subject_text_view"
+                android:layout_marginStart="15dp"
+                android:layout_alignTop="@+id/Suggestion_poster_username_text_view"
+                android:layout_toEndOf="@+id/Suggestion_poster_username_text_view"
+                android:minLines="1"/>
+
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:editable="false"
+                android:ems="10"
+                android:id="@+id/Suggestion_details_details"
+                android:layout_below="@+id/Suggestion_details_subject_text_view"
+                android:layout_marginTop="10dp"
+                android:layout_alignStart="@+id/Suggestion_poster_username_text_view"
+                android:layout_marginRight="15dp"
+                android:minLines="5"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="27 Votes"
+                android:layout_below="@id/Suggestion_details_details"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/Suggestion_details_total_votes"/>
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/Suggestion_details_bar"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/Suggestion_details_total_votes"
+                android:layout_marginTop="5dp"/>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/Suggestion_upvote_button"
+                android:layout_toEndOf="@id/Suggestion_details_bar"
+                android:layout_below="@+id/Suggestion_details_total_votes"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/thumbs_up"/>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/Suggestion_downvote_button"
+                android:layout_toStartOf="@id/Suggestion_details_bar"
+                android:layout_below="@+id/Suggestion_details_total_votes"
+                android:layout_marginEnd="5dp"
+                android:src="@drawable/thumbs_down"/>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

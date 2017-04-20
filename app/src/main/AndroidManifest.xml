@@ -37,6 +37,8 @@
         </activity>
         <activity android:name=".activity.ViewMySuggestionsActivity">
         </activity>
+        <activity android:name=".activity.SuggestionDetailViewActivity">
+        </activity>
     </application>
 
 </manifest>
