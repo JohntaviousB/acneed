@@ -9,7 +9,9 @@
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/scrollView3">
+        android:id="@+id/scrollView3"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -40,10 +42,11 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Medium Text"
                 android:id="@+id/Suggestion_details_subject_text_view"
-                android:layout_marginStart="15dp"
-                android:layout_alignTop="@+id/Suggestion_poster_username_text_view"
-                android:layout_toEndOf="@+id/Suggestion_poster_username_text_view"
-                android:minLines="1"/>
+                android:minLines="1"
+                android:layout_below="@+id/Suggestion_poster_username_text_view"
+                android:layout_alignStart="@+id/Suggestion_downvote_button"
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="17dp"/>
 
             <EditText
                 android:layout_width="fill_parent"
@@ -67,13 +70,14 @@
                 android:id="@+id/Suggestion_details_total_votes"/>
 
             <ProgressBar
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/Suggestion_details_bar"
-                android:layout_centerHorizontal="true"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/Suggestion_details_total_votes"
-                android:layout_marginTop="5dp"/>
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:indeterminate="false"/>
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -82,7 +86,8 @@
                 android:layout_toEndOf="@id/Suggestion_details_bar"
                 android:layout_below="@+id/Suggestion_details_total_votes"
                 android:layout_marginStart="5dp"
-                android:src="@drawable/thumbs_up"/>
+                android:src="@drawable/thumbs_up"
+                android:onClick="upVote"/>
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -91,7 +96,8 @@
                 android:layout_toStartOf="@id/Suggestion_details_bar"
                 android:layout_below="@+id/Suggestion_details_total_votes"
                 android:layout_marginEnd="5dp"
-                android:src="@drawable/thumbs_down"/>
+                android:src="@drawable/thumbs_down"
+                android:onClick="downVote"/>
         </RelativeLayout>
     </ScrollView>
 

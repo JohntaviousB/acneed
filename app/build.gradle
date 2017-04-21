@@ -38,6 +38,7 @@ dependencies {
     compile 'org.jcodec:jcodec-android:0.1.9'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.9'
     compile 'com.firebaseui:firebase-ui-database:1.2.0'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     androidTestCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

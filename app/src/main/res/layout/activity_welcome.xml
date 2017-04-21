@@ -29,6 +29,14 @@
                     android:id="@+id/Home_navbar"
                     layout="@layout/content_navbar"/>
 
+                <com.facebook.login.widget.LoginButton
+                    android:id="@+id/fb_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/Home_navbar"
+                    android:visibility="gone"/>
+
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -45,7 +53,7 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="My Pictures"
                     android:id="@+id/Home_my_journey_text"
-                    android:layout_marginTop="48dp"
+                    android:layout_marginTop="10dp"
                     android:onClick="startMyJourneyActivity"
                     android:clickable="true"
                     android:layout_below="@+id/Home_username"
@@ -82,6 +90,7 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/Home_thumbnails_scroll_view"
@@ -145,9 +154,9 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="My Videos"
+                    android:layout_marginTop="5dp"
                     android:id="@+id/Home_my_videos_text"
-                    android:layout_below="@+id/linearLayout"
-                    android:layout_alignEnd="@+id/Home_add_image"
+                    android:layout_below="@+id/Home_thumbnails_scroll_view"
                     android:layout_alignStart="@+id/Home_my_journey_text"/>
 
                 <HorizontalScrollView
@@ -180,5 +189,6 @@
             android:onClick="goToPostSuggestion"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"/>
+
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>
