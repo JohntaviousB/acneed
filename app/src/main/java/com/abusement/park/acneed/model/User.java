@@ -14,6 +14,7 @@ public class User {
     private List<Video> videos;
     private List<Suggestion> suggestions;
     private Settings settings;
+    private String username;
 
     public User() {
         images = new ArrayList<>();
@@ -30,6 +31,7 @@ public class User {
         videos = new ArrayList<>();
         suggestions = new ArrayList<>();
         settings = Settings.DEFAULT_SETTINGS;
+        this.username = email.substring(0, email.indexOf('@'));
     }
 
     public void addImage(Image image) {
@@ -95,6 +97,14 @@ public class User {
         if (suggestions != null) {
             suggestions.remove(index);
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public List<Suggestion> getSuggestions() {

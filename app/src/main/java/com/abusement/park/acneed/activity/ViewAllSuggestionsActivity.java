@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.abusement.park.acneed.R;
@@ -22,7 +21,7 @@ public class ViewAllSuggestionsActivity extends AppCompatActivity {
 
     private static final String TAG = "ViewAllSuggestions";
 
-    private static class SuggestionViewHolder extends RecyclerView.ViewHolder {
+    public static class SuggestionViewHolder extends RecyclerView.ViewHolder {
         TextView percentText;
         TextView totalVotesText;
         TextView subjectText;
@@ -38,7 +37,9 @@ public class ViewAllSuggestionsActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (suggestion != null) {
-                        Log.d(TAG, "CLICKED CHILD: " + suggestion.getId());
+                        Intent intent = new Intent(v.getContext(), SuggestionDetailViewActivity.class);
+                        intent.putExtra("suggestionId", suggestion.getId());
+                        v.getContext().startActivity(intent);
                     }
                 }
             });

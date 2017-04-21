@@ -29,6 +29,19 @@ import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.model.Video;
 import com.abusement.park.acneed.utils.ImageCompressor;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.facebook.share.ShareApi;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareVideo;
+import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.widget.ShareDialog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +58,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -68,31 +82,35 @@ public class WelcomeActivity extends AppCompatActivity {
     private MediaController mediaController;
 
     private String currentReminderFrequency;
-
     private Uri capturedImageUri;
 
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1;
-    private static final int THUMBNAIL_HEIGHT = 100;
-    private static final int THUMBNAIL_WIDTH = 100;
+    private static final int THUMBNAIL_HEIGHT = 320;
+    private static final int THUMBNAIL_WIDTH = 320;
+
+    private LoginButton loginButton;
+    private CallbackManager callbackManager;
+    private AccessToken accessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         if (firebaseAuth.getCurrentUser() == null) {
             logout(null);
         }
         initializeViews();
-        retrieveUser();
-        currentReminderFrequency = frequencyEditText.getText().toString();
         String email = firebaseAuth.getCurrentUser().getEmail();
         String defaultUsername = email.substring(0, email.indexOf('@'));
+        currentReminderFrequency = frequencyEditText.getText().toString();
         usernameText.setText(defaultUsername);
+        retrieveUser(defaultUsername);
     }
 
-    private void retrieveUser() {
+    private void retrieveUser(final String username) {
         databaseReference.child("users").child(firebaseAuth.getCurrentUser().getUid())
                 .addValueEventListener(new ValueEventListener() {
 
@@ -101,6 +119,9 @@ public class WelcomeActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         user = dataSnapshot.getValue(User.class);
                         if (user != null) {
+                            if (StringUtils.isBlank(user.getUsername())) {
+                                user.setUsername(username);
+                            }
                             clearThumbnails();
                             int index = 0;
                             for (Image image : user.getImages()) {
@@ -128,6 +149,10 @@ public class WelcomeActivity extends AppCompatActivity {
         imagesThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
         videoThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_videos_linear_layout);
         mediaController = new MediaController(WelcomeActivity.this);
+        loginButton = (LoginButton) findViewById(R.id.fb_login);
+        loginButton.setReadPermissions("email");
+        callbackManager = CallbackManager.Factory.create();
+
     }
 
     private void clearThumbnails() {
@@ -184,6 +209,7 @@ public class WelcomeActivity extends AppCompatActivity {
             }
             databaseReference.child("users").child(user.getUid()).setValue(user);
         }
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void addImageThumbnailToScrollView(Uri imageUri, final int index) {
@@ -209,7 +235,7 @@ public class WelcomeActivity extends AppCompatActivity {
         newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                return displayDeleteDialog(index, true);
+                return displayDeleteDialog(index);
             }
         });
         imagesThumbnailsLayout.addView(newThumbnail);
@@ -218,12 +244,11 @@ public class WelcomeActivity extends AppCompatActivity {
     private void addVideoThumbnailToScrollView(Uri videoUri, String filepath,  final int index) {
         ImageView newThumbnail = new ImageView(this);
         newThumbnail.setImageBitmap(ThumbnailUtils.createVideoThumbnail(filepath, MediaStore.Images.Thumbnails
-                .MICRO_KIND));
+                .MINI_KIND));
         newThumbnail.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                displayDeleteDialog(index, false);
-                return true;
+                return displayVideoUploadOrDeleteDialog(index);
             }
         });
         newThumbnail.setOnClickListener(new View.OnClickListener() {
@@ -244,17 +269,13 @@ public class WelcomeActivity extends AppCompatActivity {
         videoThumbnailsLayout.addView(newThumbnail);
     }
 
-    private boolean displayDeleteDialog(final int index, final boolean image) {
+    private boolean displayDeleteDialog(final int index) {
         AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeActivity.this);
         builder.setTitle("Delete?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (image) {
-                            user.removeImage(index);
-                        } else {
-                            user.removeVideo(index);
-                        }
+                        user.removeImage(index);
                         databaseReference.child("users").child(user.getUid()).setValue(user);
                         dialog.dismiss();
                     }
@@ -263,6 +284,28 @@ public class WelcomeActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
+                    }
+                })
+                .show();
+        return true;
+    }
+
+    private boolean displayVideoUploadOrDeleteDialog(final int index) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeActivity.this);
+        builder.setTitle("Choose")
+                .setPositiveButton("Upload to Facebook", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        uploadVideo(user.getVideos().get(index).getUri());
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        user.removeVideo(index);
+                        databaseReference.child("users").child(user.getUid()).setValue(user);
+                        dialog.dismiss();
                     }
                 })
                 .show();
@@ -393,4 +436,55 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
+    public void uploadVideo(String uriString) {
+        loginToFb();
+        Uri uri = Uri.parse(uriString);
+        ShareVideo video = new ShareVideo.Builder()
+                .setLocalUrl(uri)
+                .build();
+        ShareVideoContent content = new ShareVideoContent.Builder()
+                .setVideo(video)
+                .build();
+        ShareApi.share(content, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                Log.d(TAG, "Video Uploaded successfully");
+                Toast.makeText(WelcomeActivity.this, "Journey successfully posted to Facebook", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "Video upload cancelled");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d("TAG", "Video upload failed", error);
+                Toast.makeText(WelcomeActivity.this, "Journey failed to post to Facebook", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void loginToFb() {
+        if (accessToken == null || accessToken.isExpired()) {
+            LoginManager lm = LoginManager.getInstance();
+            lm.logInWithPublishPermissions(this, Collections.singletonList("publish_actions"));
+            lm.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    Log.d(TAG, "SUCCEfSSFUL FB LOGIN" + loginResult.getAccessToken());
+                }
+
+                @Override
+                public void onCancel() {
+                    Log.d(TAG, "FB LOGIN CANCELLED");
+                }
+
+                @Override
+                public void onError(FacebookException error) {
+                    Log.d(TAG, "BAD FB LOGIN", error);
+                }
+            });
+        }
+    }
 }

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Acneed</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="facebook_app_id">151113588754060</string>
 </resources>

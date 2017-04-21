@@ -82,7 +82,7 @@ public class PostSuggestionActivity extends AppCompatActivity {
         if (validateInput()) {
             String subject = subjectEditText.getText().toString().trim();
             String description = descriptionEditText.getText().toString().trim();
-            Suggestion suggestion = new Suggestion(currentUser.getUid(), subject, description);
+            Suggestion suggestion = new Suggestion(currentUser.getUsername(), subject, description);
             Log.d(TAG, "Posting suggestion: " + subject);
             ProgressDialog modal = displayProgressDialog();
             DatabaseReference dbReference  = databaseReference.child("suggestions").push();
