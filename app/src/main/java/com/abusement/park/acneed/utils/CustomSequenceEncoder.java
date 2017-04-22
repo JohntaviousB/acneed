@@ -74,7 +74,7 @@ public class CustomSequenceEncoder  {
         H264Utils.wipePS(result, spsList, ppsList);
         H264Utils.encodeMOVPacket(result);
 
-        // Add packet to video track
+        // Add 3 packets to video track
         outTrack.addFrame(new MP4Packet(result, frameNo, 1, 1, frameNo, true, null, frameNo++, 0));
         outTrack.addFrame(new MP4Packet(result, frameNo, 1, 1, frameNo, true, null, frameNo++, 0));
         outTrack.addFrame(new MP4Packet(result, frameNo, 1, 1, frameNo, true, null, frameNo++, 0));
