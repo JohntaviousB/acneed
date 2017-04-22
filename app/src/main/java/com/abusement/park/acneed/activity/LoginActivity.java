@@ -92,6 +92,9 @@ public class LoginActivity extends AppCompatActivity {
                        startActivity(new Intent(LoginActivity.this, WelcomeActivity.class));
                    } else {
                        Log.i(TAG, "Registration unsuccessful.");
+                       if (task.getException() != null) {
+                           Log.d(TAG, "Registration Exception: " + task.getException().getMessage());
+                       }
                        Toast.makeText(LoginActivity.this, "Could not register with these " +
                                "credentials", Toast
                                .LENGTH_LONG).show();

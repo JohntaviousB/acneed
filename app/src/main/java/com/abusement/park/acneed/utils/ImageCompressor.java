@@ -12,12 +12,6 @@ public class ImageCompressor {
 
     /**
      * Needed in order to avoid OutOfMemoryExceptions when instantiating multiple thumbnails
-     * @param filepath
-     * @param contentResolver
-     * @param width
-     * @param height
-     * @return
-     * @throws FileNotFoundException
      */
     public static Bitmap compressImageToThumbnail(Uri filepath, ContentResolver contentResolver, int width, int height)
             throws FileNotFoundException {

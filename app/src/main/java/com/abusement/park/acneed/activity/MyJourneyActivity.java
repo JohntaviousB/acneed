@@ -88,7 +88,7 @@ public class MyJourneyActivity extends AppCompatActivity {
     public void displayConfirmVideoDialog(View view) {
         new AlertDialog.Builder(view.getContext())
             .setTitle("Create Your Journey?")
-            .setMessage("The selected ictures will be included in your journey.")
+            .setMessage("The selected pictures will be included in your journey.")
             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

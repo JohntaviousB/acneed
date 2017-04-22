@@ -2,12 +2,14 @@ package com.abusement.park.acneed.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -25,9 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abusement.park.acneed.R;
+import com.abusement.park.acneed.model.FacialDetectionResult;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.model.Video;
+import com.abusement.park.acneed.utils.FacePPClient;
+import com.abusement.park.acneed.utils.FileRetriever;
 import com.abusement.park.acneed.utils.ImageCompressor;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -36,12 +41,10 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
-import com.facebook.share.widget.ShareDialog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,8 +64,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static android.text.format.DateFormat.getMediumDateFormat;
+import static com.abusement.park.acneed.utils.FacePPClient.*;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -79,16 +84,14 @@ public class WelcomeActivity extends AppCompatActivity {
     private TextView usernameText;
     private LinearLayout imagesThumbnailsLayout;
     private LinearLayout videoThumbnailsLayout;
-    private MediaController mediaController;
 
     private String currentReminderFrequency;
-    private Uri capturedImageUri;
+    private File capturedImageFile;
 
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1;
     private static final int THUMBNAIL_HEIGHT = 320;
     private static final int THUMBNAIL_WIDTH = 320;
 
-    private LoginButton loginButton;
     private CallbackManager callbackManager;
     private AccessToken accessToken;
 
@@ -148,9 +151,6 @@ public class WelcomeActivity extends AppCompatActivity {
         saveReminderSettingsTextView = (TextView) findViewById(R.id.Home_save_reminder_changes);
         imagesThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
         videoThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_videos_linear_layout);
-        mediaController = new MediaController(WelcomeActivity.this);
-        loginButton = (LoginButton) findViewById(R.id.fb_login);
-        loginButton.setReadPermissions("email");
         callbackManager = CallbackManager.Factory.create();
 
     }
@@ -165,21 +165,18 @@ public class WelcomeActivity extends AppCompatActivity {
         root.mkdirs();
         String fname = "ACNEED" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         try {
-            return Uri.fromFile(File.createTempFile(fname, ".jpg", root));
+            capturedImageFile = File.createTempFile(fname, ".jpg", root);
+            return Uri.fromFile(capturedImageFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void displayEditProfileDialog(View view) {
-        // TODO: 3/25/2017
     }
 
     public void addImageToMyJourney(View view) {
         List<Intent> cameraIntents = new ArrayList<>();
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         List<ResolveInfo> resInfo = getPackageManager().queryIntentActivities(captureIntent, 0);
-        capturedImageUri = createImageCaptureLocation();
+        Uri capturedImageUri = createImageCaptureLocation();
         for (ResolveInfo res : resInfo) {
             Intent intent = new Intent(captureIntent);
             intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
@@ -199,15 +196,45 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
+            File imageFile;
+            boolean tempFileCreated = false;
             if (data != null && data.getAction() == null) {
+                // selected from the gallery
                 int takeFlags = data.getFlags();
                 takeFlags &= Intent.FLAG_GRANT_READ_URI_PERMISSION;
                 getContentResolver().takePersistableUriPermission(data.getData(), takeFlags);
-                user.addImage(new Image(data.getData().toString(), new Date()));
+                imageFile = FileRetriever.getFileFromUri(data.getData(), WelcomeActivity.this);
+                tempFileCreated = true;
             } else {
-                user.addImage(new Image(capturedImageUri.toString(), new Date()));
+                // captured with the camera
+                imageFile = capturedImageFile;
             }
-            databaseReference.child("users").child(user.getUid()).setValue(user);
+            FacialDetectionResult result = null;
+            try {
+                result = new FacialDetectionTask().execute(imageFile).get();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.d(TAG, "Error retrieving result", e);
+                return;
+            }
+            if (result.getFaces().length == 1) {
+                if (tempFileCreated) {
+                    user.addImage(new Image(data.getData().toString(), new Date()));
+                } else {
+                    user.addImage(new Image(Uri.fromFile(imageFile).toString(), new Date()));
+                }
+                databaseReference.child("users").child(user.getUid()).setValue(user);
+            } else {
+                if (result.getFaces().length == 0) {
+                    Toast.makeText(WelcomeActivity.this, "Please make sure your image has your face included!", Toast
+                            .LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(WelcomeActivity.this, "Please make sure your face is the only face present!",Toast
+                            .LENGTH_LONG).show();
+                }
+            }
+            if (tempFileCreated) {
+                imageFile.delete();
+            }
         }
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
@@ -429,9 +456,9 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private static class IntegerWrapper {
-        public int value;
+        int value;
 
-        public IntegerWrapper(int value) {
+        IntegerWrapper(int value) {
             this.value = value;
         }
     }
@@ -472,7 +499,8 @@ public class WelcomeActivity extends AppCompatActivity {
             lm.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
-                    Log.d(TAG, "SUCCEfSSFUL FB LOGIN" + loginResult.getAccessToken());
+                    accessToken = loginResult.getAccessToken();
+                    Log.d(TAG, "SUCCESSFUL FB LOGIN" + accessToken);
                 }
 
                 @Override
@@ -485,6 +513,35 @@ public class WelcomeActivity extends AppCompatActivity {
                     Log.d(TAG, "BAD FB LOGIN", error);
                 }
             });
+        }
+    }
+
+    private class FacialDetectionTask extends AsyncTask<File, Void, FacialDetectionResult> {
+
+        private ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(WelcomeActivity.this);
+            progressDialog.setMessage("Checking Image...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected FacialDetectionResult doInBackground(File... params) {
+            String responseJson = detectFaces(params[0]);
+            try {
+                FacialDetectionResult result = new ObjectMapper().readValue(responseJson, FacialDetectionResult.class);
+                return result;
+            } catch (IOException e) {
+                Log.d(TAG, "ERROR converting json to object");
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(FacialDetectionResult s) {
+            progressDialog.dismiss();
         }
     }
 }
