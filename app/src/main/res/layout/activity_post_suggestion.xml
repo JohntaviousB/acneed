@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.abusement.park.acneed.activity.PostSuggestionActivity">
 
     <ScrollView
@@ -17,19 +18,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <include
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/content_navbar"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/Post_suggestion_navbar"/>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/Post_suggestion_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:addStatesFromChildren="true"
+                android:background="?attr/colorPrimary"
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="New Suggestion"/>
 
             <EditText
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/Post_suggestion_title_edit_text"
-                android:layout_below="@+id/Post_suggestion_navbar"
+                android:layout_below="@+id/Post_suggestion_toolbar"
                 android:layout_centerHorizontal="true"
                 android:hint="Title"
                 android:layout_marginLeft="20dp"

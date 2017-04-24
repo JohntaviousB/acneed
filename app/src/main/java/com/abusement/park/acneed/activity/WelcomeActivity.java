@@ -15,14 +15,16 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +33,6 @@ import com.abusement.park.acneed.model.FacialDetectionResult;
 import com.abusement.park.acneed.model.Image;
 import com.abusement.park.acneed.model.User;
 import com.abusement.park.acneed.model.Video;
-import com.abusement.park.acneed.utils.FacePPClient;
 import com.abusement.park.acneed.utils.FileRetriever;
 import com.abusement.park.acneed.utils.ImageCompressor;
 import com.facebook.AccessToken;
@@ -84,6 +85,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private TextView usernameText;
     private LinearLayout imagesThumbnailsLayout;
     private LinearLayout videoThumbnailsLayout;
+    private Toolbar toolbar;
 
     private String currentReminderFrequency;
     private File capturedImageFile;
@@ -152,7 +154,33 @@ public class WelcomeActivity extends AppCompatActivity {
         imagesThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_scroll_view_layout);
         videoThumbnailsLayout = (LinearLayout) findViewById(R.id.Home_videos_linear_layout);
         callbackManager = CallbackManager.Factory.create();
+        toolbar = (Toolbar) findViewById(R.id.Home_toolbar);
+        setSupportActionBar(toolbar);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_home:
+                return true;
+            case R.id.action_logout:
+                logout(null);
+                return true;
+            case R.id.action_suggestions:
+                goToIdeas(null);
+                return true;
+            case R.id.action_journey:
+                startMyJourneyActivity(null);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void clearThumbnails() {
@@ -457,7 +485,6 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private static class IntegerWrapper {
         int value;
-
         IntegerWrapper(int value) {
             this.value = value;
         }

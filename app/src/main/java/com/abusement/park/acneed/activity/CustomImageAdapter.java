@@ -3,6 +3,7 @@ package com.abusement.park.acneed.activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
@@ -74,8 +75,9 @@ public class CustomImageAdapter extends ArrayAdapter<Image> {
         super(context, resource, objects);
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(super.getContext());
         View customView = convertView == null ? inflater.inflate(R.layout.images_list_item, parent, false) :
                 convertView;
