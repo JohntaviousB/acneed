@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.abusement.park.acneed.activity.SuggestionDetailViewActivity">
 
     <ScrollView
@@ -17,13 +18,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <include
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/content_navbar"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/include"/>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/Suggestion_details_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:addStatesFromChildren="true"
+                android:background="?attr/colorPrimary"
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="Details"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -31,7 +35,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="username"
                 android:id="@+id/Suggestion_poster_username_text_view"
-                android:layout_below="@+id/include"
+                android:layout_below="@+id/Suggestion_details_toolbar"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="10dp"
                 android:layout_alignParentStart="true"/>
