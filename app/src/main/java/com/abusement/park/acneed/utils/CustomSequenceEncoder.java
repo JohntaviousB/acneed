@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class CustomSequenceEncoder  {
+
     private SeekableByteChannel ch;
     private Picture toEncode;
     private Transform transform;
